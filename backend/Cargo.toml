@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "edge-agent",
+    "ledger",
+    "proof-engine",
+    "lean/ffi"          
+]
+resolver = "2"

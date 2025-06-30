@@ -1,0 +1,118 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* SentinelOps Industrial Dark Theme */
+@layer base {
+  :root {
+    --background: 217 19% 9%;
+    --foreground: 213 27% 84%;
+
+    --card: 217 19% 12%;
+    --card-foreground: 213 27% 84%;
+
+    --popover: 217 19% 9%;
+    --popover-foreground: 213 27% 84%;
+
+    --primary: 142 71% 45%;
+    --primary-foreground: 217 19% 9%;
+
+    --secondary: 217 10% 20%;
+    --secondary-foreground: 213 27% 84%;
+
+    --muted: 217 10% 20%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 217 10% 20%;
+    --accent-foreground: 213 27% 84%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 10% 20%;
+    --input: 217 10% 20%;
+    --ring: 142 71% 45%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 217 19% 7%;
+    --sidebar-foreground: 213 27% 84%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 217 19% 9%;
+    --sidebar-accent: 217 10% 15%;
+    --sidebar-accent-foreground: 213 27% 84%;
+    --sidebar-border: 217 10% 15%;
+    --sidebar-ring: 142 71% 45%;
+
+    /* Custom color variables */
+    --pass: 74 91% 70%;
+    --fail: 0 84% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-mono;
+  }
+}
+
+@layer utilities {
+  .status-pass {
+    @apply text-pass border-pass/20 bg-pass/10;
+  }
+  
+  .status-fail {
+    @apply text-fail border-fail/20 bg-fail/10;
+  }
+  
+  .status-warning {
+    @apply text-yellow-400 border-yellow-400/20 bg-yellow-400/10;
+  }
+  
+  .industrial-grid {
+    @apply grid gap-6 p-6;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  
+  .industrial-card {
+    @apply bg-card border border-border rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200;
+  }
+  
+  .metric-value {
+    @apply font-mono text-2xl font-bold;
+  }
+
+  /* Custom color utilities */
+  .text-pass {
+    color: hsl(var(--pass));
+  }
+  
+  .text-fail {
+    color: hsl(var(--fail));
+  }
+
+  .bg-pass {
+    background-color: hsl(var(--pass));
+  }
+  
+  .bg-fail {
+    background-color: hsl(var(--fail));
+  }
+
+  .border-pass {
+    border-color: hsl(var(--pass));
+  }
+  
+  .border-fail {
+    border-color: hsl(var(--fail));
+  }
+}
