@@ -1,0 +1,6 @@
+uvicorn[standard]
+ariadne
+fastapi
+aiokafka
+asyncpg
+python-dotenv

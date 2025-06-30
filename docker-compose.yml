@@ -1,22 +1,79 @@
 version: "3.9"
 
 services:
-  backend:
-    build: ./backend
-    container_name: sentinel_backend
-    environment:
-      - CORS_ORIGIN=http://localhost:5173
-    ports:
-      - "8080:8080"
-    # Add volumes or configs as needed
+  # -------- infra --------
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    environment: { ALLOW_ANONYMOUS_LOGIN: "yes" }
 
-  frontend:
-    build: ./frontend
-    container_name: sentinel_frontend
-    depends_on:
-      - backend
+  kafka:
+    image: bitnami/kafka:3.6
     environment:
-      - VITE_API_URL=http://backend:8080/graphql
-      - VITE_EXPORT_URL=http://backend:8080/export
-    ports:
-      - "5173:80"
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    depends_on: [zookeeper]
+    ports: ["9092:9092"]
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel
+      POSTGRES_DB: sentinel
+    ports: ["5432:5432"]
+
+  # -------- plc + agent --------
+  openplc:
+    image: openplc/openplc_v3
+    ports: ["502:502"]
+
+  edge-agent:
+    build: ./edge-agent
+    environment:
+      PLC_HOST: openplc
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TRACE_TOPIC: plc.trace
+    depends_on: [openplc, kafka]
+
+  # -------- proof engine -------
+  proof-engine:
+    build: ./proof-engine
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      WINDOW_HORIZON: 6
+      LD_LIBRARY_PATH: /app/lib
+    volumes:
+      - ./lean/build/lib:/app/lib:ro
+    depends_on: [kafka]
+
+  # -------- ledger -------------
+  ledger-batcher:
+    build: ./ledger
+    command: cargo run --bin batcher
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      PG_URL: postgres://sentinel:sentinel@postgres/sentinel
+      POLYGON_RPC: https://polygon-mumbai.infura.io/v3/xyz
+      POLYGON_PRIVATE_KEY: 0x...
+      ANCHOR_CONTRACT: 0x...
+    depends_on: [kafka, postgres]
+
+  # -------- api gateway --------
+  api-gateway:
+    build: ./api-gateway
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      PG_URL: postgres://sentinel:sentinel@postgres/sentinel
+    ports: ["8080:8080"]
+    depends_on: [kafka, postgres]
+
+  # -------- frontend --------
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8080/graphql # or "http://api-gateway:8080/graphql" inside compose net
+    ports: ["3000:80"]
+    depends_on: [api-gateway]
