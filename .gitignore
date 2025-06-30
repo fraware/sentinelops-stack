@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# But keep what matters
+!frontend/
+!backend/
+!docker-compose.yml
+!.gitignore
